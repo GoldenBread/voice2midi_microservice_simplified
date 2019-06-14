@@ -61,7 +61,6 @@ def generation(uploaded_file, path_to_generated_output):
     json_output = get_json_generated_files(path_to_generated_output)
 
     return json_output
-    #return Response(str(json_output), mimetype='application/json')
 
 def get_json_generated_files(path_to_generated_output):
     cmd_ls = '/bin/ls ' + path_to_generated_output
@@ -70,9 +69,9 @@ def get_json_generated_files(path_to_generated_output):
     print(generated_files)
 
     json_output = {}
-    json_output['midiOutput'] = []
+    json_output['linkOutput'] = []
     for generated_file in generated_files:
-        json_output['midiOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
+        json_output['linkOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
     
     return json_output
 
