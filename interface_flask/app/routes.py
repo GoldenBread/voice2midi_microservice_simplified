@@ -4,8 +4,10 @@ from werkzeug.utils import secure_filename
 import os
 import subprocess
 import uuid
+import urlparse
 
 UPLOAD_FOLDER = '/app/upload'
+GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['wav', 'mid'])
 BASE_URL = 'http://vps662256.ovh.net:5000'
 
@@ -23,57 +25,45 @@ def allowed_file(filename):
 def index():
     return '{ "status": "running" }'
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
-
-@app.route('/upload_generate', methods=['GET', 'POST'])
+@app.route('/upload_generate', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        uploaded_file = handle_upload(request)
-        json_output = generation(upload_file)
-        return Response(str(json_output), mimetype='application/json')
-    return 'POST Request'
-
-def handle_upload(request):
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
-    file = request.files['file']
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return filename
-
-
-def generation(uploaded_file):
     rnd_string = str(uuid.uuid4())
     
-    filename = 'result.mid'
-    path_to_generated_output = '/tmp/magenta_generated/' + rnd_string
-    full_path_to_file = os.path.join(path_to_generated_output, filename)
+    uploaded_file = 'original.wav'
+    path_to_generated_output = os.path.join(GENERATE_FOLDER, rnd_string)
 
-    cmd_melodia = '/app/audio_to_midi_melodia.py ' + uploaded_file + ' ' + full_path_to_file + ' 60'
+    handle_upload(request, path_to_generated_output, uploaded_file)
+
+    json_output = generation(uploaded_file, path_to_generated_output)
+    return Response(str(json_output), mimetype='application/json')
+
+def handle_upload(request, path_to_generated_output, uploaded_file):
+    # check if the post request has the file part
+    file = request.files['file']
+    if file and allowed_file(file.filename):
+        create_path(path_to_generated_output)
+        file.save(os.path.join(path_to_generated_output, uploaded_file))
+
+def create_path(path):
+    if not os.path.exists(path):          
+        os.makedirs(path)
+
+def generation(uploaded_file, path_to_generated_output):
+    filename = 'result.mid'
+
+    cmd_melodia = '/app/audio_to_midi_melodia.py ' + os.path.join(path_to_generated_output, uploaded_file) + ' ' + os.path.join(path_to_generated_output, filename) + ' 60'
     so_melodia = os.popen(cmd_melodia).read()
     print(so_melodia)
+    print(cmd_melodia)
 
-    deleteFile(filename)
+    midi_to_mp3(filename, path_to_generated_output)
 
-    midiToMp3(filename, path_to_generated_output)
-
-    json_output = getJsonGeneratedFiles(url_path_to_generated_output, rnd_string)
+    json_output = get_json_generated_files(path_to_generated_output)
 
     return json_output
     #return Response(str(json_output), mimetype='application/json')
 
-def deleteFile(filename):
-    cmd_file = '/bin/rm ' + os.path.join(UPLOAD_FOLDER, filename)
-    so_file = os.popen(cmd_file).read()
-    print(so_file)
-
-def getJsonGeneratedFiles(url_path_to_generated_output, rnd_string):
+def get_json_generated_files(path_to_generated_output):
     cmd_ls = '/bin/ls ' + path_to_generated_output
     so_ls = os.popen(cmd_ls).read().split('\n')
     generated_files = filter(None, so_ls)
@@ -82,24 +72,26 @@ def getJsonGeneratedFiles(url_path_to_generated_output, rnd_string):
     json_output = {}
     json_output['midiOutput'] = []
     for generated_file in generated_files:
-        json_output['midiOutput'].append(os.path.join(url_path_to_generated_output, rnd_string, generated_file))
+        json_output['midiOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
     
     return json_output
 
 
-def midiToMp3(midi_file, path_to_generated_output):
+def midi_to_mp3(midi_file, path_to_generated_output):
     raw_filename = midi_file + '.raw'
     mp3_filename = midi_file + '.mp3'
 
     cmd_convert_raw = 'fluidsynth -i /app/GeneralUser_GS.sf2 ' + os.path.join(path_to_generated_output, midi_file) + ' -F ' + os.path.join(path_to_generated_output, raw_filename)
+    print(cmd_convert_raw)
     so_raw = os.popen(cmd_convert_raw).read()
     print(so_raw)
 
     cmd_convert_mp3 = 'sox -t raw -r 88200 -e signed -b 16 -c 1 ' + os.path.join(path_to_generated_output, raw_filename) + ' ' + os.path.join(path_to_generated_output, mp3_filename)
+    print(cmd_convert_mp3)
     so_mp3 = os.popen(cmd_convert_mp3).read()
     print(so_mp3)
 
-@app.route('/generated/<path:filename>')
-def downloadFile(filename):
-    path = os.path.join("/tmp/magenta_generated/", filename)
+@app.route('/app/generated/<path:filename>')
+def download_file(filename):
+    path = os.path.join(GENERATE_FOLDER, filename)
     return send_file(path, as_attachment=True)
