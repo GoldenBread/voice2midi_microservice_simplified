@@ -71,9 +71,9 @@ def get_json_generated_files(path_to_generated_output):
     #json_output['linkOutput'] = []
     #for generated_file in generated_files:
         #json_output['linkOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
-    json_output['originalWavLink'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE)))
-    json_output['mp3Link'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME)))
-    json_output['midiLink'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME)))
+    json_output['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
+    json_output['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
+    json_output['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
     
     return json_output
 
