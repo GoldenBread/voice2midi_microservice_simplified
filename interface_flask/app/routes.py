@@ -9,7 +9,8 @@ import errno
 
 GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['audio/x-wav'])
-BASE_URL = 'http://vps662256.ovh.net:5000/api/v1/'
+BASE_URL = 'http://vps662256.ovh.net:5000/'
+VERSION = '/api/v1/'
 
 UPLOADED_WAV_FILE = 'original.wav'
 MIDI_FILENAME = 'result.mid'
@@ -77,9 +78,9 @@ def get_json_generated_files(path_to_generated_output, soundId):
     #for generated_file in generated_files:
         #json_output['linkOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
     json_output['soundId'] = soundId
-    json_output['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
-    json_output['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
-    json_output['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
+    json_output['originalWavLink'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
+    json_output['mp3Link'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, MP3_FILENAME))
+    json_output['midiLink'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, MIDI_FILENAME))
     
     return json_output
 
@@ -107,10 +108,10 @@ def sound_list():
     json_output['soundLinkLists'] = []
     for generated_file in generated_files:
         sound_json = {}
-        sound_json['soundId'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
-        sound_json['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
-        sound_json['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
-        sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
+        sound_json['soundId'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
+        sound_json['originalWavLink'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
+        sound_json['mp3Link'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, MP3_FILENAME))
+        sound_json['midiLink'] = urlparse.urljoin(BASE_URL, VERSION, os.path.join(path_to_generated_output, MIDI_FILENAME))
 
         json_output['soundLinkLists'].append(sound_json)
     return json_output
