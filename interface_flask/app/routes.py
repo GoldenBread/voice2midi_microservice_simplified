@@ -6,10 +6,11 @@ import subprocess
 import uuid
 import urlparse
 import errno
+import json
 
 GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['audio/x-wav'])
-BASE_URL = 'http://vps662256.ovh.net:5000'
+BASE_URL = 'http://vps662256.ovh.net:5000/'
 
 UPLOADED_WAV_FILE = 'original.wav'
 MIDI_FILENAME = 'result.mid'
@@ -29,14 +30,14 @@ def index():
 
 @app.route('/upload_generate', methods=['POST'])
 def upload_wav_file():
-    rnd_string = str(uuid.uuid4())
+    soundId = str(uuid.uuid4())
     
-    path_to_generated_output = os.path.join(GENERATE_FOLDER, rnd_string)
+    path_to_generated_output = os.path.join(GENERATE_FOLDER, soundId)
 
     handle_upload(request, path_to_generated_output, UPLOADED_WAV_FILE)
 
-    json_output = generation(UPLOADED_WAV_FILE, path_to_generated_output)
-    return Response(str(json_output), mimetype='application/json')
+    json_output = generation(UPLOADED_WAV_FILE, path_to_generated_output, soundId)
+    return Response(json.dumps(json_output), mimetype='application/json')
 
 def handle_upload(request, path_to_generated_output, uploaded_file):
     # check if the post request has the file part
@@ -54,7 +55,7 @@ def create_path(path):
                 raise
 		
 
-def generation(uploaded_file, path_to_generated_output):
+def generation(uploaded_file, path_to_generated_output, soundId):
     cmd_melodia = '/app/audio_to_midi_melodia.py ' + os.path.join(path_to_generated_output, uploaded_file) + ' ' + os.path.join(path_to_generated_output, MIDI_FILENAME) + ' 60'
     so_melodia = os.popen(cmd_melodia).read()
     print(so_melodia)
@@ -62,11 +63,11 @@ def generation(uploaded_file, path_to_generated_output):
 
     midi_to_mp3(MIDI_FILENAME, path_to_generated_output)
 
-    json_output = get_json_generated_files(path_to_generated_output)
+    json_output = get_json_generated_files(path_to_generated_output, soundId)
 
     return json_output
 
-def get_json_generated_files(path_to_generated_output):
+def get_json_generated_files(path_to_generated_output, soundId):
     cmd_ls = '/bin/ls ' + path_to_generated_output
     so_ls = os.popen(cmd_ls).read().split('\n')
     generated_files = filter(None, so_ls)
@@ -76,6 +77,7 @@ def get_json_generated_files(path_to_generated_output):
     #json_output['linkOutput'] = []
     #for generated_file in generated_files:
         #json_output['linkOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
+    json_output['soundId'] = soundId
     json_output['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
     json_output['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
     json_output['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
@@ -93,6 +95,27 @@ def midi_to_mp3(midi_file, path_to_generated_output):
     print(cmd_convert_mp3)
     so_mp3 = os.popen(cmd_convert_mp3).read()
     print(so_mp3)
+
+
+@app.route('/sound_list')
+def sound_list():
+    cmd_ls = '/bin/ls ' + GENERATE_FOLDER
+    so_ls = os.popen(cmd_ls).read().split('\n')
+    generated_folders = filter(None, so_ls)
+    print(generated_folders)
+
+    json_output = {}
+    json_output['soundLinkLists'] = []
+    for generated_folder in generated_folders:
+        sound_json = {}
+        sound_json['soundId'] = generated_folder
+        sound_json['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, UPLOADED_WAV_FILE))
+        sound_json['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MP3_FILENAME))
+        sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MIDI_FILENAME))
+
+        json_output['soundLinkLists'].append(sound_json)
+    return Response(json.dumps(json_output), mimetype='application/json')
+
 
 @app.route('/app/generated/<path:filename>')
 def download_file(filename):
