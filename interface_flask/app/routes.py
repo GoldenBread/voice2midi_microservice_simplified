@@ -105,12 +105,12 @@ def sound_list():
 
     json_output = {}
     json_output['soundLinkLists'] = []
-    for generated_file in generated_files:
+    for generated_folder in generated_folders:
         sound_json = {}
-        sound_json['soundId'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
-        sound_json['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
-        sound_json['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
-        sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
+        sound_json['soundId'] = generated_folder
+        sound_json['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, UPLOADED_WAV_FILE))
+        sound_json['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MP3_FILENAME))
+        sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MIDI_FILENAME))
 
         json_output['soundLinkLists'].append(sound_json)
     return json_output
