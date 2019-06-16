@@ -5,6 +5,7 @@ import os
 import subprocess
 import uuid
 import urlparse
+import errno
 
 GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['wav'])
@@ -46,8 +47,13 @@ def handle_upload(request, path_to_generated_output, uploaded_file):
         file.save(os.path.join(path_to_generated_output, uploaded_file))
 
 def create_path(path):
-    if not os.path.exists(path):          
-        os.makedirs(path)
+    if not os.path.exists(path):
+        try:
+            os.makedirs(path)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise  # raises the error again
+		
 
 def generation(uploaded_file, path_to_generated_output):
     cmd_melodia = '/app/audio_to_midi_melodia.py ' + os.path.join(path_to_generated_output, uploaded_file) + ' ' + os.path.join(path_to_generated_output, MIDI_FILENAME) + ' 60'
