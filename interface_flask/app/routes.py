@@ -47,8 +47,11 @@ def handle_upload(request, path_to_generated_output, uploaded_file):
         file.save(os.path.join(path_to_generated_output, uploaded_file))
 
 def create_path(path):
+    print("os.path.exists(path)")
+    print(os.path.exists(path))
     if not os.path.exists(path):
         try:
+            print("os.makedirs(path)")
             os.makedirs(path)
         except OSError as e:
             if e.errno != errno.EEXIST:
