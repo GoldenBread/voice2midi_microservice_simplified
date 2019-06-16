@@ -113,7 +113,7 @@ def sound_list():
         sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MIDI_FILENAME))
 
         json_output['soundLinkLists'].append(sound_json)
-    return json_output
+    return Response(str(json_output), mimetype='application/json')
 
 
 @app.route('/app/generated/<path:filename>')
