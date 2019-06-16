@@ -8,7 +8,7 @@ import urlparse
 import errno
 
 GENERATE_FOLDER = '/app/generated'
-ALLOWED_EXTENSIONS = set(['wav'])
+ALLOWED_EXTENSIONS = set(['audio/x-wav'])
 BASE_URL = 'http://vps662256.ovh.net:5000'
 
 UPLOADED_WAV_FILE = 'original.wav'
@@ -20,9 +20,8 @@ app.secret_key = b'{je8^#zPQms[&upq'
 app.config['SESSION_TYPE'] = 'filesystem'
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(content_type):
+    return content_type.lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -42,20 +41,17 @@ def upload_wav_file():
 def handle_upload(request, path_to_generated_output, uploaded_file):
     # check if the post request has the file part
     file = request.files['file']
-    if file and allowed_file(file.filename):
+    if file and allowed_file(file.content_type):
         create_path(path_to_generated_output)
         file.save(os.path.join(path_to_generated_output, uploaded_file))
 
 def create_path(path):
-    print("os.path.exists(path)")
-    print(os.path.exists(path))
     if not os.path.exists(path):
         try:
-            print("os.makedirs(path)")
             os.makedirs(path)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                raise  # raises the error again
+                raise
 		
 
 def generation(uploaded_file, path_to_generated_output):
