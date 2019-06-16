@@ -77,10 +77,10 @@ def get_json_generated_files(path_to_generated_output, soundId):
     #json_output['linkOutput'] = []
     #for generated_file in generated_files:
         #json_output['linkOutput'].append(urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, generated_file)))
-    json_output['soundId'] = soundId
-    json_output['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
-    json_output['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
-    json_output['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
+    json_output['sound_id'] = soundId
+    json_output['original_wav_link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, UPLOADED_WAV_FILE))
+    json_output['mp3_link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MP3_FILENAME))
+    json_output['midi_link'] = urlparse.urljoin(BASE_URL, os.path.join(path_to_generated_output, MIDI_FILENAME))
     
     return json_output
 
@@ -105,15 +105,15 @@ def sound_list():
     print(generated_folders)
 
     json_output = {}
-    json_output['soundLinkLists'] = []
+    json_output['sound_link_lists'] = []
     for generated_folder in generated_folders:
         sound_json = {}
-        sound_json['soundId'] = generated_folder
-        sound_json['originalWavLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, UPLOADED_WAV_FILE))
-        sound_json['mp3Link'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MP3_FILENAME))
-        sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MIDI_FILENAME))
+        sound_json['sound_id'] = generated_folder
+        sound_json['original_wav_link'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, UPLOADED_WAV_FILE))
+        sound_json['mp3_link'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MP3_FILENAME))
+        sound_json['midi_link'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MIDI_FILENAME))
 
-        json_output['soundLinkLists'].append(sound_json)
+        json_output['sound_link_lists'].append(sound_json)
     return Response(json.dumps(json_output), mimetype='application/json')
 
 
