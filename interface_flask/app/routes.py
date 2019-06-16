@@ -6,6 +6,7 @@ import subprocess
 import uuid
 import urlparse
 import errno
+import json
 
 GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['audio/x-wav'])
@@ -36,7 +37,7 @@ def upload_wav_file():
     handle_upload(request, path_to_generated_output, UPLOADED_WAV_FILE)
 
     json_output = generation(UPLOADED_WAV_FILE, path_to_generated_output, soundId)
-    return Response(str(json_output), mimetype='application/json')
+    return Response(json.dumps(json_output), mimetype='application/json')
 
 def handle_upload(request, path_to_generated_output, uploaded_file):
     # check if the post request has the file part
@@ -113,7 +114,7 @@ def sound_list():
         sound_json['midiLink'] = urlparse.urljoin(BASE_URL, os.path.join(GENERATE_FOLDER, generated_folder, MIDI_FILENAME))
 
         json_output['soundLinkLists'].append(sound_json)
-    return Response(str(json_output), mimetype='application/json')
+    return Response(json.dumps(json_output), mimetype='application/json')
 
 
 @app.route('/app/generated/<path:filename>')
