@@ -9,7 +9,7 @@ import errno
 
 GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['audio/x-wav'])
-BASE_URL = 'http://vps662256.ovh.net:5000/api/v1'
+BASE_URL = 'http://vps662256.ovh.net:5000/api/v1/'
 
 UPLOADED_WAV_FILE = 'original.wav'
 MIDI_FILENAME = 'result.mid'
