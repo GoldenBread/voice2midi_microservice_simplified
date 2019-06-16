@@ -9,7 +9,7 @@ import errno
 
 GENERATE_FOLDER = '/app/generated'
 ALLOWED_EXTENSIONS = set(['audio/x-wav'])
-BASE_URL = 'http://vps662256.ovh.net:5000'
+BASE_URL = 'http://vps662256.ovh.net:5000/api/v1'
 
 UPLOADED_WAV_FILE = 'original.wav'
 MIDI_FILENAME = 'result.mid'
@@ -23,7 +23,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 def allowed_file(content_type):
     return content_type.lower() in ALLOWED_EXTENSIONS
 
-@app.route('/api/v1/')
+@app.route('/api/v1')
 def index():
     return '{ "status": "running" }'
 
